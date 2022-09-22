@@ -42,7 +42,8 @@ var (
 	retentionTimezoneOffset = flag.Duration("retentionTimezoneOffset", 0, "The offset for performing indexdb rotation. "+
 		"If set to 0, then the indexdb rotation is performed at 4am UTC time per each -retentionPeriod. "+
 		"If set to 2h, then the indexdb rotation is performed at 4am EET time (the timezone with +2h offset)")
-
+	downsampling = flag.String("downsampling.period", "", "-downsampling.period=30d:5m,180d:30m instructs VictoriaMetrics to deduplicate samples older than 30 days with 5 minutes interval and to deduplicate samples older than 180 days with 30 minutes interval interval.")
+ 
 	logNewSeries = flag.Bool("logNewSeries", false, "Whether to log new series. This option is for debug purposes only. It can lead to performance issues "+
 		"when big number of new series are ingested into VictoriaMetrics")
 	denyQueriesOutsideRetention = flag.Bool("denyQueriesOutsideRetention", false, "Whether to deny queries outside of the configured -retentionPeriod. "+
@@ -91,6 +92,7 @@ func InitWithoutMetrics(resetCacheIfNeeded func(mrs []storage.MetricRow)) {
 	}
 
 	resetResponseCacheIfNeeded = resetCacheIfNeeded
+	storage.SetDownsampling(*downsampling)
 	storage.SetLogNewSeries(*logNewSeries)
 	storage.SetFinalMergeDelay(*finalMergeDelay)
 	storage.SetBigMergeWorkersCount(*bigMergeConcurrency)
